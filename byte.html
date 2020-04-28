@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+
+<html>
+<body>
+<canvas id="c1" width="1000" height="470" style="border:1px solid">
+Canvas object not supported
+</canvas>
+<script>
+
+var c1 = document.getElementById("c1");
+var ctx = c1.getContext("2d");
+var buttons = new Array();
+
+function showValue(val) {
+	ctx.save();		
+	ctx.font = "36px Arial";
+	ctx.fillStyle = 'rgb(0,0,0)';
+	ctx.clearRect(100,40,400,150);
+	ctx.fillText("Value:    " + val, 100, 70);
+	ctx.fillText("Hex:       " + new Number(val).toString(16), 100, 110);
+	ctx.fillText("Binary:   " + new Number(val).toString(2), 100, 150);
+
+	this.ctx.restore();		
+}
+
+
+window.addEventListener("click", function(e) {
+	var value=0;
+	for(var i=0; i < buttons.length; i++) {
+		buttons[i].handleClick(e);
+		if(buttons[i].on) {
+			value += buttons[i].bitVal;			
+		}
+	}
+	showValue(value);	
+});
+
+showValue(0);
+
+function toggleButton(x, y, width, height, text, initialStateOn, ctx2d, colorOn, colorOff, padding, textFont) {
+	btn = {
+		ctx: ctx2d,
+		topLeftX: x,
+		topLeftY: y,
+		padding: padding,
+		text: text,
+		textFont: textFont,
+		width: width,
+		height: height,
+		textPadX: 0,
+		textPadY: 0,
+		on: initialStateOn,
+		toggleExtra: function() {},
+		colorOn: colorOn,
+		colorOff: colorOff,
+		displayText: text,
+		draw: function() {
+			this.ctx.save();
+			this.ctx.strokeStyle = 'rgb(0,0,0)';
+			if(this.on) {
+				this.ctx.fillStyle = this.colorOn;
+			} else {
+				this.ctx.fillStyle = this.colorOff;
+			}
+			this.erase();
+			paddingX = 0;
+			paddingY = 0;
+			if(this.padding) {
+				paddingX = this.padding;
+				paddingY = this.padding;
+			}
+			textFontVal = "18px Arial";
+			if(this.textFont) {
+				textFontVal = this.textFont;
+			}
+
+			this.ctx.fillRect(this.topLeftX + paddingX, this.topLeftY + paddingY, this.width - 2*paddingX, this.height - 2*paddingY);	
+			this.ctx.strokeRect(this.topLeftX, this.topLeftY, this.width, this.height);	
+			this.ctx.font = textFontVal;
+			this.ctx.fillStyle = 'rgb(0,0,0)';
+			this.ctx.fillText(this.text, this.topLeftX + paddingX + 2 + this.textPadX, this.topLeftY + this.height - paddingY - 2 - this.textPadY, this.width - 2*paddingX);
+			this.ctx.restore;		
+		},
+		erase: function() {
+			this.ctx.clearRect(this.topLeftX, this.topLeftY, this.width, this.height);	
+		},
+		toggle() {
+			this.on = !this.on;
+			this.toggleExtra();
+		},
+		handleClick: function(e) {
+			if(e.pageX >= this.topLeftX && e.pageY >= this.topLeftY && e.pageX <= this.topLeftX + this.width && e.pageY <= this.topLeftY + this.height) {
+//alert(e.pageX + "," + e.pageY + " -- " + this.topLeftX + "," + this.topLeftY);
+			this.toggle();
+			this.erase();
+			//alert(this.text);
+			this.draw();
+		}
+
+		}	
+	};
+	buttons.push(btn);
+	return btn;	
+}
+
+var LEFT_MARGIN = 80;
+var SPACING = 40;
+var TOP_MARGIN = 300;
+var BTN_WIDTH = 70;
+var BTN_HEIGHT = 40;
+
+var bitVal = 128;
+for(var i=0; i < 8; i++) {
+	var btn = toggleButton(LEFT_MARGIN + i*(SPACING + BTN_WIDTH), TOP_MARGIN, BTN_WIDTH, BTN_HEIGHT, "   0", false, ctx, 'orange', 'gray', 4, "24px Arial");		
+	btn.textPadX = 3;
+	btn.textPadY = 5;
+	btn.bitVal = bitVal;
+	btn.toggleExtra = function() {
+		if(this.on) {
+			this.text = "   1";
+		} else {
+			this.text = "   0";
+		}
+	};
+	btn.draw();
+	var bitText = "  ";
+	if(bitVal < 10) {
+		bitText = "    ";
+	} else if(bitVal < 100) {
+		bitText = "   ";
+	}
+	bitText += bitVal;
+	ctx.fillText(bitText, LEFT_MARGIN + i*(SPACING + BTN_WIDTH), TOP_MARGIN + BTN_HEIGHT + 30);
+	bitVal = bitVal / 2;
+
+}
+
+ctx.save();
+ctx.font = "24px Arial";
+ctx.fillText("Byte simulator - Click on bits to change the value", 210, 430);
+ctx.restore(); 
+
+
+</script>
+</body>
+</html>
